@@ -1,0 +1,71 @@
+{
+  "name": "Equipment failure risk",
+  "version": "equipment-risk-1.0",
+  "task": "Probability that a pump fails within 14 days, with the readings driving it.",
+  "algorithm": "Gradient boosting (scikit-learn HistGradientBoosting) with monotonic constraints from pump physics; native handling of missing sensors",
+  "monotonicConstraints": {
+    "energy_ratio": 1,
+    "energy_trend": 1,
+    "flow_ratio": -1,
+    "pressure_ratio": -1,
+    "vibration_mm_s": 1,
+    "motor_temp_c": 1,
+    "runtime_h_per_day": 1,
+    "starts_per_day": 1,
+    "service_overdue_ratio": 1,
+    "age_ratio": 1
+  },
+  "trainedAt": "2026-09-29T08:54:51+00:00",
+  "features": [
+    "energy_ratio",
+    "energy_trend",
+    "flow_ratio",
+    "pressure_ratio",
+    "vibration_mm_s",
+    "motor_temp_c",
+    "runtime_h_per_day",
+    "starts_per_day",
+    "service_overdue_ratio",
+    "age_ratio"
+  ],
+  "data": "Simulated fleet: 700 pumps x 540 days of wear, servicing and failures (irrigaiq_ml/equipment/simulator.py).",
+  "evaluation": {
+    "rocAuc": 0.7820431482050938,
+    "averagePrecision": 0.19888864819477625,
+    "brier": 0.04589704204395167,
+    "baseRate": 0.05244038451325084,
+    "atHighThreshold": {
+      "threshold": 0.15,
+      "recall": 0.3159813652015394,
+      "precision": 0.2418979686773143
+    },
+    "rulesBaseline": {
+      "recall": 0.35750455742353654,
+      "precision": 0.18322433302190388
+    },
+    "modelAtRulesRecall": {
+      "recall": 0.35750455742353654,
+      "precision": 0.22501274859765427,
+      "threshold": 0.13154695508471365
+    },
+    "ceiling": {
+      "rocAuc": 0.7875267447045581,
+      "averagePrecision": 0.20938480723926228
+    },
+    "trainPumps": 525,
+    "testPumps": 175,
+    "rows": 376623
+  },
+  "riskBands": {
+    "LOW": "< 5%",
+    "MODERATE": "5-15%",
+    "HIGH": "15-35%",
+    "CRITICAL": ">= 35%"
+  },
+  "interpretation": "Failures are random events even for a worn pump, so no model can foresee most of them. The fair yardstick is the ceiling (scoring with each pump's true hidden wear): the model reaches 99% of its ROC AUC. At the rules' catch rate it is 23% more precise, and adds a calibrated 14-day probability, a smooth ranking and tolerance of missing sensors.",
+  "limitations": [
+    "Trained on simulated degradation, not on failures of real IrrigaIQ pumps.",
+    "Physically plausible but idealised: real pumps fail in ways the simulation does not model.",
+    "Complements, not replaces, the explainable health score; retrain on real telemetry and maintenance records once a season of data exists."
+  ]
+}

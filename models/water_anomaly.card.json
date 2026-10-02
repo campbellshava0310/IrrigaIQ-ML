@@ -1,0 +1,35 @@
+{
+  "name": "Water anomaly",
+  "version": "water-anomaly-1.1",
+  "task": "Flag hours of abnormal water flow at a meter, with severity and possible causes.",
+  "algorithm": "Robust per-hour baseline (median/MAD by hour and irrigation state) + Isolation Forest",
+  "trainedAt": "2026-09-29T12:44:38+00:00",
+  "fittedOn": "Each meter's own history at request time (unsupervised); no shared training data.",
+  "evaluation": {
+    "detectionRate": {
+      "leak": 1.0,
+      "slow_leak": 0.9,
+      "burst": 1.0,
+      "left_running": 1.0,
+      "blockage": 1.0
+    },
+    "falseAlarmRate": 0.0,
+    "hourPrecision": 1.0,
+    "trialsPerCase": 40,
+    "windowHours": 48,
+    "historyDays": 21
+  },
+  "evaluationData": "Simulated meters (IrrigaIQ schedules, 900-3300 L/h design rates) with injected faults.",
+  "faults": {
+    "leak": "18-30 % of the run rate added to every hour",
+    "slow_leak": "3-6 % of the run rate added to every hour",
+    "burst": "120-180 % of the run rate added",
+    "left_running": "a run continuing through unscheduled hours",
+    "blockage": "scheduled runs delivering 25-50 % of normal flow"
+  },
+  "limitations": [
+    "Needs at least 72 hours of a meter's history before it can judge.",
+    "A meter cannot tell a leak from a valve left open: causes are offered as possibilities.",
+    "Evaluated on simulated faults; confirm thresholds against real meters once installed."
+  ]
+}

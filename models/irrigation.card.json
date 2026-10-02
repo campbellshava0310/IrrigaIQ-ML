@@ -1,0 +1,79 @@
+{
+  "name": "Irrigation need",
+  "version": "irrigation-need-1.0",
+  "task": "Classify a field's irrigation need as Low, Medium or High from today's conditions.",
+  "algorithm": "Gradient boosting (scikit-learn HistGradientBoosting), chosen over the other candidates by cross-validated balanced accuracy",
+  "trainedAt": "2026-09-29T08:43:30+00:00",
+  "data": {
+    "file": "train.csv",
+    "sha256": "feb2c63e38d62f377fb58c742cc7d2a9b2e242c6e8ee012e4182cd4d57595cba",
+    "rows": 630000,
+    "trainRows": 504000,
+    "testRows": 126000,
+    "classBalance": {
+      "Low": 0.5872,
+      "Medium": 0.3795,
+      "High": 0.0333
+    }
+  },
+  "features": [
+    "Soil_Moisture",
+    "Temperature_C",
+    "Wind_Speed_kmh",
+    "Rainfall_mm",
+    "Crop_Growth_Stage",
+    "Mulching_Used"
+  ],
+  "featureSelection": "Six of twenty candidate columns; the rest changed held-out balanced accuracy by less than 0.001 under permutation, so they are left out rather than filled with guesses.",
+  "decisionRule": "Class probability divided by training frequency, largest wins (optimises balanced accuracy).",
+  "modelComparison": {
+    "logistic_regression": {
+      "balanced_accuracy": 0.846301484961231,
+      "macro_f1": 0.7398937045858642,
+      "log_loss": 0.29114479781458086,
+      "recall_low": 0.881783896716914,
+      "recall_medium": 0.7720740662661186,
+      "recall_high": 0.8850464919006606,
+      "calibration_error": 0.008386811169618464,
+      "seconds": 1.6
+    },
+    "random_forest": {
+      "balanced_accuracy": 0.9651794263846282,
+      "macro_f1": 0.9341879757953979,
+      "log_loss": 0.08566396837099326,
+      "recall_low": 0.9952313883629883,
+      "recall_medium": 0.9522855837813148,
+      "recall_high": 0.9480213070095814,
+      "calibration_error": 0.003890015212182161,
+      "seconds": 9.2
+    },
+    "gradient_boosting": {
+      "balanced_accuracy": 0.9661336910162386,
+      "macro_f1": 0.9477483475452549,
+      "log_loss": 0.06403638668065269,
+      "recall_low": 0.9933580062833919,
+      "recall_medium": 0.9604195214504059,
+      "recall_high": 0.9446235453149178,
+      "calibration_error": 0.0020297510543507845,
+      "seconds": 10.4
+    }
+  },
+  "heldOutTest": {
+    "balanced_accuracy": 0.969197905086368,
+    "macro_f1": 0.9485976295632511,
+    "log_loss": 0.05960511908458788,
+    "recall_low": 0.9948501682819026,
+    "recall_medium": 0.9586740562584963,
+    "recall_high": 0.9540694907187054,
+    "calibration_error": 0.0007596025287082095
+  },
+  "limitations": [
+    "Trained on a public synthetic benchmark dataset, not on measurements from IrrigaIQ farms.",
+    "Seasons and regions in the data are Indian; season and region carry no signal and are not used.",
+    "Rainfall in the data is annual-scale and, below about 300 mm, marks dry conditions; IrrigaIQ passes the last 90 days of rain scaled to a year, so a dry spell reads as dry even where the yearly total is high.",
+    "The dataset does not define its soil-moisture scale. IrrigaIQ treats it as a probe-style percentage with about 15 % at wilting point and 40 % at field capacity, which places the model's learnt dry threshold (about 25 %) at 60 % depletion, the stress threshold of typical field crops (FAO-56, p = 0.5-0.6).",
+    "Volumes, run times and timing still come from the FAO-56 water balance; this model answers whether irrigation is needed and how confident it is.",
+    "Retrain on sensor-labelled data from IrrigaIQ farms before relying on it for decisions."
+  ],
+  "selectedCandidate": "gradient_boosting"
+}
